@@ -57,7 +57,8 @@ typedef struct aica_channel {
     uint32      vol;        /* Volume 0-255 */
     uint32      pan;        /* Pan 0-255 */
     uint32      pos;        /* Sample playback pos */
-    uint32      pad[5];     /* Padding */
+    uint32      playing;    /* Sample playing */
+    uint32      pad[4];     /* Padding */
 } aica_channel_t;
 
 /* Declare an aica_cmd_t big enough to hold an aica_channel_t

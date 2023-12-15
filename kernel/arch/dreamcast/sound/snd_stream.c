@@ -737,3 +737,15 @@ void snd_stream_volume(snd_stream_hnd_t hnd, int vol) {
     cmd->cmd_id = streams[hnd].ch[1];
     snd_sh4_to_aica(tmp, cmd->size);
 }
+
+void snd_stream_pan(int chn, int pan) {
+    AICA_CMDSTR_CHANNEL(tmp, cmd, chan);
+
+    cmd->cmd = AICA_CMD_CHAN;
+    cmd->timestamp = 0;
+    cmd->size = AICA_CMDSTR_CHANNEL_SIZE;
+    cmd->cmd_id = chn;
+    chan->cmd = AICA_CH_CMD_UPDATE | AICA_CH_UPDATE_SET_PAN;
+    chan->pan = pan;
+    snd_sh4_to_aica(tmp, cmd->size);
+}

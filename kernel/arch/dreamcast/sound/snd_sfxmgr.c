@@ -395,7 +395,7 @@ sfxhnd_t snd_sfx_load(const char *fn) {
     return (sfxhnd_t)effect;
 }
 
-int snd_sfx_play_chn(int chn, sfxhnd_t idx, int vol, int pan) {
+int snd_sfx_play_chn(int chn, sfxhnd_t idx, int vol, int pan, double freqMul, int tIsLooping) {
     int size;
     snd_effect_t *t = (snd_effect_t *)idx;
     AICA_CMDSTR_CHANNEL(tmp, cmd, chan);
@@ -412,10 +412,10 @@ int snd_sfx_play_chn(int chn, sfxhnd_t idx, int vol, int pan) {
     chan->base = t->locl;
     chan->type = t->fmt;
     chan->length = size;
-    chan->loop = 0;
+    chan->loop = tIsLooping;
     chan->loopstart = 0;
     chan->loopend = size;
-    chan->freq = t->rate;
+    chan->freq = (freqMul == 1.0) ? t->rate : (freqMul * t->rate);
     chan->vol = vol;
 
     if(!t->stereo) {
@@ -438,7 +438,7 @@ int snd_sfx_play_chn(int chn, sfxhnd_t idx, int vol, int pan) {
     return chn;
 }
 
-int snd_sfx_play(sfxhnd_t idx, int vol, int pan) {
+int snd_sfx_play(sfxhnd_t idx, int vol, int pan, double freqMul, int tIsLooping) {
     int chn, moved, old;
 
     /* This isn't perfect.. but it should be good enough. */
@@ -461,8 +461,8 @@ int snd_sfx_play(sfxhnd_t idx, int vol, int pan) {
         return -1;
     }
     else {
-        sfx_nextchan = (chn + 2) % 64;  /* in case of stereo */
-        return snd_sfx_play_chn(chn, idx, vol, pan);
+        sfx_nextchan = (chn + 2) % 64;  // in case of stereo
+        return snd_sfx_play_chn(chn, idx, vol, pan, freqMul, tIsLooping);
     }
 }
 
@@ -521,4 +521,36 @@ void snd_sfx_chn_free(int chn) {
     old = irq_disable();
     sfx_inuse &= ~(1 << chn);
     irq_restore(old);
+}
+
+/* the address of the sound ram from the SH4 side */
+#define SPU_RAM_BASE            0xa0800000
+
+int snd_sfx_chn_playing(int chn) {
+    uint32 chk;
+
+    /* check if playing */
+    chk = g2_read_32(SPU_RAM_BASE + AICA_CHANNEL(chn)
+                    + offsetof(aica_channel_t, playing));
+    if(chk == 0)
+        return 0; /* stopped */
+
+    /* check if confirmed playing */
+    if(chk != 2)
+        return 1; /* not done */
+
+    /* check if looped sfx */
+    chk = g2_read_32(SPU_RAM_BASE + AICA_CHANNEL(chn)
+                    + offsetof(aica_channel_t, loop));
+    if(chk)
+        return 1; /* looping sfx is never done */
+
+    /* check if still playing */
+    chk = g2_read_32(SPU_RAM_BASE + AICA_CHANNEL(chn)
+                    + offsetof(aica_channel_t, pos));
+
+    if(chk == 0)
+        return 0; /* done */
+
+    return 1; /* not done */
 }

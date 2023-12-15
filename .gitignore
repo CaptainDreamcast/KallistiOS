@@ -6,6 +6,7 @@
 *~
 .*.swp
 .DS_Store
+.git*
 doc/reference/
 environ.sh
 romdisk.img
@@ -15,6 +16,7 @@ kernel/arch/dreamcast/kernel/arch_exports.c
 kernel/arch/dreamcast/kernel/banner.h
 kernel/arch/dreamcast/sound/arm/stream.drv
 lib/dreamcast/*.a
+addons/include/prism
 addons/lib/dreamcast/*.a
 utils/bincnv/bincnv
 utils/genromfs/genromfs

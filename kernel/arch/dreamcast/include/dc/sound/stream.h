@@ -303,6 +303,8 @@ int snd_stream_poll(snd_stream_hnd_t hnd);
 */
 void snd_stream_volume(snd_stream_hnd_t hnd, int vol);
 
+void snd_stream_pan(int chn, int pan);
+
 __END_DECLS
 
 #endif  /* __DC_SOUND_STREAM_H */

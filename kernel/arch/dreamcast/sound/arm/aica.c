@@ -157,6 +157,8 @@ void aica_play(int ch, int delay) {
     else {
         CHNREG32(ch, 0) = 0xc000 | playCont;    /* key on */
     }
+	
+	chans[ch].playing = 1; /* just started */
 }
 
 /* Start sound on all channels specified by chmap bitmap */
@@ -174,6 +176,7 @@ void aica_sync_play(uint32 chmap) {
 
 /* Stop the sound on a given channel */
 void aica_stop(int ch) {
+	chans[ch].playing = 0; /* stopped */
     CHNREG32(ch, 0) = (CHNREG32(ch, 0) & ~0x4000) | 0x8000;
 }
 
@@ -219,6 +222,10 @@ int aica_get_pos(int ch) {
 
     /* Update position counters */
     chans[ch].pos = SNDREG32(0x2814) & 0xffff;
+
+	if(chans[ch].playing == 1)
+			if(chans[ch].pos)
+				chans[ch].playing = 2; /* confirmed playing */
 
     return chans[ch].pos;
 }

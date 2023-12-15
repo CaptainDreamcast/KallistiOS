@@ -89,7 +89,7 @@ void snd_sfx_unload_all(void);
                             right channel will be the next one) on success, or
                             -1 on failure.
 */
-int snd_sfx_play(sfxhnd_t idx, int vol, int pan);
+int snd_sfx_play(sfxhnd_t idx, int vol, int pan, double freqMul, int tIsLooping);
 
 /** \brief  Play a sound effect on a specific channel.
 
@@ -107,7 +107,7 @@ int snd_sfx_play(sfxhnd_t idx, int vol, int pan);
 
     \return                 chn
 */
-int snd_sfx_play_chn(int chn, sfxhnd_t idx, int vol, int pan);
+int snd_sfx_play_chn(int chn, sfxhnd_t idx, int vol, int pan, double freqMul, int tIsLooping);
 
 /** \brief  Stop a single channel of sound.
 
@@ -145,6 +145,15 @@ int snd_sfx_chn_alloc(void);
     \param  chn             The channel to free.
 */
 void snd_sfx_chn_free(int chn);
+
+/** \brief  Check if channel is playing.
+
+    This function returns 1 if the channel is currently playing, it returns 0 
+	when either the sound effect hasn't started playing yet or when it has finished.
+
+    \param  chn             The channel to check.
+*/
+int snd_sfx_chn_playing(int chn);
 
 __END_DECLS
 
